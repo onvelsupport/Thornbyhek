@@ -4,228 +4,568 @@
 
 {% block extra_css %}
 <style>
+:root {
+    --detail-black: #0a0a0a;
+    --detail-white: #ffffff;
+    --detail-cream: #f4f1eb;
+    --detail-soft-grey: #f4f4f4;
+    --detail-border: #dedede;
+    --detail-grey: #707070;
+    --detail-green: #0d5c3f;
+    --heading-font: "Cormorant Garamond", Georgia, serif;
+    --body-font: "Manrope", Arial, sans-serif;
+}
+
+.product-detail-page {
+    background: var(--detail-white);
+}
+
+/* BREADCRUMB */
+
+.product-breadcrumb {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 25px 4% 0;
+}
+
+.product-breadcrumb ol {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.product-breadcrumb li,
+.product-breadcrumb a {
+    color: var(--detail-grey);
+    font-family: var(--body-font);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.product-breadcrumb a:hover {
+    color: var(--detail-black);
+}
+
+.product-breadcrumb .separator {
+    color: #b2b2b2;
+}
+
+/* LAYOUT */
+
 .product-detail-container {
-    max-width: 1200px;
-    margin: 60px auto;
-    padding: 0 40px 70px;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 42px 4% 110px;
 }
 
 .product-detail {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
+    grid-template-columns: minmax(0, 1.15fr) minmax(380px, 0.85fr);
+    gap: clamp(50px, 7vw, 110px);
     align-items: start;
 }
 
-/* Images */
+/* PRODUCT GALLERY */
 
 .product-images {
+    min-width: 0;
+}
+
+.main-image-wrapper {
+    position: relative;
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 690px;
+    overflow: hidden;
+    background: var(--detail-soft-grey);
 }
 
 #mainImage {
+    display: block;
     width: 100%;
-    max-width: 620px;
-    height: 620px;
+    height: 690px;
     object-fit: contain;
-    background: #fff;
+    transition:
+        opacity 0.2s ease,
+        transform 0.4s ease;
 }
+
+.main-image-wrapper:hover #mainImage {
+    transform: scale(1.015);
+}
+
+.main-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 690px;
+    color: var(--detail-black);
+    font-family: var(--heading-font);
+    font-size: 35px;
+    font-weight: 600;
+    letter-spacing: 3px;
+}
+
+.image-badge {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    z-index: 2;
+    padding: 8px 12px;
+    background: var(--detail-black);
+    color: var(--detail-white);
+    font-family: var(--body-font);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+.image-badge.sale {
+    background: var(--detail-green);
+}
+
+/* THUMBNAILS */
 
 .thumbnail-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 10px;
-    flex-wrap: wrap;
+    margin-top: 12px;
 }
 
-.thumbnail-row img {
-    width: 72px;
-    height: 72px;
-    object-fit: cover;
+.thumbnail-button {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 105px;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid transparent;
+    background: var(--detail-soft-grey);
     cursor: pointer;
-    border: 1px solid #ddd;
-    background: #f5f5f5;
 }
 
-.thumbnail-row img:hover {
-    border-color: #111;
+.thumbnail-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-/* Product info */
+.thumbnail-button:hover,
+.thumbnail-button.active {
+    border-color: var(--detail-black);
+}
 
-.product-info h1 {
-    font-size: 42px;
+/* PRODUCT INFORMATION */
+
+.product-info {
+    position: sticky;
+    top: 120px;
+    min-width: 0;
+    padding-top: 10px;
+}
+
+.product-category {
+    display: block;
+    margin-bottom: 15px;
+    color: var(--detail-grey);
+    font-family: var(--body-font);
+    font-size: 9px;
     font-weight: 700;
-    margin: 0;
-    text-transform: uppercase;
     letter-spacing: 2px;
-    line-height: 1.2;
+    text-transform: uppercase;
 }
 
 .title-row {
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
-    gap: 15px;
+    justify-content: space-between;
+    gap: 25px;
     margin-bottom: 18px;
 }
 
+.product-info h1 {
+    max-width: 560px;
+    margin: 0;
+    color: var(--detail-black);
+    font-family: var(--heading-font);
+    font-size: clamp(45px, 5vw, 72px);
+    font-weight: 500;
+    letter-spacing: -2.5px;
+    line-height: 0.93;
+}
+
+/* FAVOURITE */
+
 .favourite-form {
-    margin-top: 5px;
+    flex-shrink: 0;
 }
 
 .favourite-btn {
-    width: 38px;
-    height: 38px;
-    background: #fff;
-    border: 1px solid #999;
-    border-radius: 4px;
-    font-size: 22px;
-    cursor: pointer;
-    color: #111;
-    line-height: 1;
-}
-
-.favourite-btn:hover {
-    transform: scale(1.05);
-}
-
-.price {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 35px;
-}
-
-.old-price {
-    color: #888;
-    text-decoration: line-through;
-    margin-right: 15px;
-    font-weight: 400;
-}
-
-.new-price {
-    color: #111;
-    font-weight: 700;
-}
-
-.size-section {
-    margin-bottom: 25px;
-}
-
-.size-label {
-    font-size: 13px;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-}
-
-.size-options {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.size-options input {
-    display: none;
-}
-
-.size-options span,
-.size-disabled {
-    width: 64px;
-    height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #111;
-    font-size: 14px;
+    width: 45px;
+    height: 45px;
+    padding: 0;
+    border: 1px solid var(--detail-border);
+    border-radius: 50%;
+    background: var(--detail-white);
+    color: var(--detail-black);
+    font-family: var(--body-font);
+    font-size: 21px;
     cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        transform 0.2s ease;
 }
 
-.size-options input:checked + span {
-    background: #111;
-    color: #fff;
+.favourite-btn:hover {
+    border-color: var(--detail-black);
+    transform: scale(1.06);
+}
+
+/* PRICE */
+
+.price {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 32px;
+    font-family: var(--body-font);
+}
+
+.old-price {
+    color: #929292;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: line-through;
+}
+
+.new-price {
+    color: var(--detail-black);
+    font-size: 19px;
+    font-weight: 700;
+}
+
+/* PRODUCT INTRODUCTION */
+
+.product-introduction {
+    margin: 0 0 30px;
+    color: var(--detail-grey);
+    font-family: var(--body-font);
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+/* SIZE OPTIONS */
+
+.size-section {
+    margin-bottom: 27px;
+}
+
+.size-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 13px;
+}
+
+.size-label {
+    margin: 0;
+    color: var(--detail-black);
+    font-family: var(--body-font);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+}
+
+.size-guide {
+    color: var(--detail-grey);
+    font-family: var(--body-font);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-transform: uppercase;
+}
+
+.size-options {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.size-option {
+    display: block;
+}
+
+.size-option input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.size-option span,
+.size-disabled {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 54px;
+    border: 1px solid var(--detail-border);
+    background: var(--detail-white);
+    color: var(--detail-black);
+    font-family: var(--body-font);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+.size-option:hover span {
+    border-color: var(--detail-black);
+}
+
+.size-option input:checked + span {
+    border-color: var(--detail-black);
+    background: var(--detail-black);
+    color: var(--detail-white);
+}
+
+.size-option input:focus-visible + span {
+    outline: 2px solid var(--detail-black);
+    outline-offset: 2px;
 }
 
 .size-disabled {
-    border-color: #ccc;
-    color: #999;
+    position: relative;
+    border-color: #e7e7e7;
+    color: #a4a4a4;
     cursor: not-allowed;
 }
 
+.size-disabled::after {
+    content: "";
+    position: absolute;
+    width: 65%;
+    height: 1px;
+    background: #c2c2c2;
+    transform: rotate(-28deg);
+}
+
+/* STOCK STATUS */
+
 .status {
-    margin: 10px 0 24px;
-    font-size: 13px;
-    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 17px;
+    color: var(--detail-green);
+    font-family: var(--body-font);
+    font-size: 9px;
     font-weight: 700;
-    color: #007a3d;
-    letter-spacing: 0.8px;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+}
+
+.status::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
 }
 
 .status.sold {
-    color: #999;
+    color: #929292;
 }
 
+/* ADD TO CART */
+
 .buy-btn {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    background: #000;
-    color: #fff;
-    text-align: center;
-    padding: 18px 20px;
-    border: none;
-    border-radius: 16px;
-    font-size: 16px;
+    min-height: 58px;
+    padding: 17px 22px;
+    border: 1px solid var(--detail-black);
+    border-radius: 0;
+    background: var(--detail-black);
+    color: var(--detail-white);
+    font-family: var(--body-font);
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
     cursor: pointer;
-    margin-bottom: 35px;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
 }
 
 .buy-btn:hover {
-    opacity: .85;
+    background: var(--detail-white);
+    color: var(--detail-black);
 }
 
 .buy-btn:disabled {
-    background: #999;
+    border-color: #a4a4a4;
+    background: #a4a4a4;
+    color: var(--detail-white);
     cursor: not-allowed;
 }
 
-/* Details */
+.buy-btn:disabled:hover {
+    background: #a4a4a4;
+    color: var(--detail-white);
+}
+
+/* SHOPPING BENEFITS */
+
+.shopping-benefits {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 14px 0 35px;
+    border: 1px solid var(--detail-border);
+}
+
+.benefit-item {
+    padding: 17px 12px;
+    text-align: center;
+}
+
+.benefit-item + .benefit-item {
+    border-left: 1px solid var(--detail-border);
+}
+
+.benefit-item i {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--detail-black);
+    font-size: 15px;
+}
+
+.benefit-item span {
+    display: block;
+    color: var(--detail-grey);
+    font-family: var(--body-font);
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    line-height: 1.5;
+    text-transform: uppercase;
+}
+
+/* DETAILS */
 
 .details-panel {
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--detail-border);
 }
 
 .detail-row {
-    padding: 20px 0;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--detail-border);
 }
 
-.detail-row h3 {
-    margin: 0 0 8px;
-    font-size: 15px;
+.detail-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 21px 0;
+    border: none;
+    background: transparent;
+    color: var(--detail-black);
+    font-family: var(--body-font);
+    font-size: 10px;
     font-weight: 700;
+    letter-spacing: 1.3px;
+    text-align: left;
     text-transform: uppercase;
-    letter-spacing: .8px;
+    cursor: pointer;
 }
 
-.detail-row p {
+.detail-toggle::after {
+    content: "+";
+    color: var(--detail-black);
+    font-size: 18px;
+    font-weight: 400;
+}
+
+.detail-row.open .detail-toggle::after {
+    content: "−";
+}
+
+.detail-content {
+    display: none;
+    padding: 0 0 23px;
+}
+
+.detail-row.open .detail-content {
+    display: block;
+}
+
+.detail-content p {
     margin: 0;
-    font-size: 14px;
-    color: #555;
-    line-height: 1.8;
+    color: var(--detail-grey);
+    font-family: var(--body-font);
+    font-size: 12px;
+    line-height: 1.85;
 }
 
-/* Mobile */
+/* TABLET */
+
+@media (max-width: 1100px) {
+    .product-detail {
+        grid-template-columns: minmax(0, 1fr) minmax(340px, 0.8fr);
+        gap: 45px;
+    }
+
+    .main-image-wrapper,
+    #mainImage,
+    .main-image-placeholder {
+        min-height: 570px;
+        height: 570px;
+    }
+
+    .product-info h1 {
+        font-size: 51px;
+    }
+
+    .thumbnail-row {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+/* MOBILE */
 
 @media (max-width: 800px) {
+    .product-breadcrumb {
+        padding: 18px 16px 0;
+    }
 
     .product-detail-container {
-        margin: 35px auto;
-        padding: 0 18px 60px;
+        padding: 24px 0 75px;
     }
 
     .product-detail {
@@ -233,25 +573,113 @@
         gap: 35px;
     }
 
-    #mainImage {
-        height: auto;
-        max-height: 420px;
+    .product-images {
+        padding: 0 12px;
+    }
+
+    .main-image-wrapper,
+    #mainImage,
+    .main-image-placeholder {
+        min-height: 450px;
+        height: 450px;
+    }
+
+    .thumbnail-row {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 3px;
+        scrollbar-width: none;
+    }
+
+    .thumbnail-row::-webkit-scrollbar {
+        display: none;
+    }
+
+    .thumbnail-button {
+        flex: 0 0 76px;
+        height: 86px;
+    }
+
+    .product-info {
+        position: static;
+        padding: 0 18px;
+    }
+
+    .product-category {
+        margin-bottom: 11px;
+    }
+
+    .title-row {
+        gap: 15px;
+        margin-bottom: 15px;
     }
 
     .product-info h1 {
-        font-size: 28px;
-        letter-spacing: 1px;
+        font-size: 43px;
+        letter-spacing: -1.7px;
+    }
+
+    .favourite-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 19px;
     }
 
     .price {
-        font-size: 22px;
+        margin-bottom: 25px;
     }
 
-    .size-options span,
-    .size-disabled {
-        width: 56px;
-        height: 56px;
-        font-size: 13px;
+    .new-price {
+        font-size: 17px;
+    }
+
+    .product-introduction {
+        font-size: 12px;
+    }
+
+    .size-options {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .shopping-benefits {
+        grid-template-columns: 1fr;
+    }
+
+    .benefit-item {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 14px 16px;
+        text-align: left;
+    }
+
+    .benefit-item + .benefit-item {
+        border-top: 1px solid var(--detail-border);
+        border-left: none;
+    }
+
+    .benefit-item i {
+        width: 19px;
+        margin: 0;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-image-wrapper,
+    #mainImage,
+    .main-image-placeholder {
+        min-height: 390px;
+        height: 390px;
+    }
+
+    .product-info h1 {
+        font-size: 38px;
+    }
+
+    .size-options {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 </style>
@@ -259,134 +687,426 @@
 
 {% block content %}
 
-<div class="product-detail-container">
-    <div class="product-detail">
+<div class="product-detail-page">
 
-        <div class="product-images">
-            {% if product.image %}
-                <img id="mainImage" src="{{ product.image.url }}" alt="{{ product.name }}">
-            {% else %}
-                <div id="mainImage" style="height:500px;display:flex;align-items:center;justify-content:center;">
-                    THORNBYHEK
-                </div>
-            {% endif %}
+    <nav
+        class="product-breadcrumb"
+        aria-label="Breadcrumb"
+    >
+        <ol>
+            <li>
+                <a href="{% url 'home' %}">
+                    Shop
+                </a>
+            </li>
 
-            <div class="thumbnail-row">
-                {% if product.image %}
-                    <img src="{{ product.image.url }}" onclick="changeImage(this)" alt="{{ product.name }}">
-                {% endif %}
+            <li class="separator">/</li>
 
-                {% for img in product.images.all %}
-                    <img src="{{ img.image.url }}" onclick="changeImage(this)" alt="{{ img.alt_text|default:product.name }}">
-                {% endfor %}
-            </div>
-        </div>
+            <li aria-current="page">
+                {{ product.name }}
+            </li>
+        </ol>
+    </nav>
 
-        <div class="product-info">
-            <div class="title-row">
-    <h1>{{ product.name }}</h1>
+    <main class="product-detail-container">
 
-    <form method="post"
-          action="{% url 'toggle_favourite' product.id %}"
-          class="favourite-form">
-        {% csrf_token %}
+        <div class="product-detail">
 
-        <button type="submit" class="favourite-btn">
-            {% if product.id in favourites %}
-                ♥
-            {% else %}
-                ♡
-            {% endif %}
-        </button>
-    </form>
-</div>
+            <section
+                class="product-images"
+                aria-label="{{ product.name }} product images"
+            >
 
-            <p class="price">
-    {% if product.sale_price %}
-        <span class="old-price">£{{ product.price }}</span>
-        <span class="new-price">£{{ product.sale_price }}</span>
-    {% else %}
-        <span class="new-price">£{{ product.price }}</span>
-    {% endif %}
-</p>
+                <div class="main-image-wrapper">
 
-            {% if product.sold_out %}
-                {% if product.sizes.exists %}
-                    <div class="size-section">
-                        <p class="size-label">Select Size</p>
+                    {% if product.sale_price %}
+                        <span class="image-badge sale">
+                            Sale
+                        </span>
+                    {% elif product.sold_out %}
+                        <span class="image-badge">
+                            Sold out
+                        </span>
+                    {% else %}
+                        <span class="image-badge">
+                            New
+                        </span>
+                    {% endif %}
 
-                        <div class="size-options">
-                            {% for size in product.sizes.all %}
-                                <span class="size-disabled">{{ size.size }}</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endif %}
-
-                <p class="status sold">Sold Out</p>
-                <button class="buy-btn" disabled>Sold Out</button>
-
-            {% else %}
-                <form method="post" action="{% url 'add_to_cart' product.id %}">
-                    {% csrf_token %}
-
-                    {% if product.sizes.exists %}
-                        <div class="size-section">
-                            <p class="size-label">Select Size</p>
-
-                            <div class="size-options">
-                                {% for size in product.sizes.all %}
-                                    {% if size.stock > 0 %}
-                                        <label>
-                                            <input type="radio" name="size" value="{{ size.size }}" required>
-                                            <span>{{ size.size }}</span>
-                                        </label>
-                                    {% else %}
-                                        <span class="size-disabled">{{ size.size }}</span>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
+                    {% if product.image %}
+                        <img
+                            id="mainImage"
+                            src="{{ product.image.url }}"
+                            alt="{{ product.name }}"
+                        >
+                    {% else %}
+                        <div class="main-image-placeholder">
+                            THORNBYHEK
                         </div>
                     {% endif %}
 
-                    <p class="status">Available</p>
-                    <button type="submit" class="buy-btn">Add to Cart</button>
-                </form>
-            {% endif %}
-
-
-            <div class="detail-row">
-    <h3>Description</h3>
-    <p>
-        {{ product.description|default:"Crafted with exceptional attention to detail, this piece combines premium materials, refined design, and everyday practicality. Designed to deliver lasting quality and timeless style, it is a statement addition to any collection." }}
-    </p>
-</div>
-
-            <div class="details-panel">
-                <div class="detail-row">
-                    <h3>Delivery</h3>
-                        <p>UK delivery is 1–2 days from the date your order is placed.</p>
                 </div>
 
-                <div class="detail-row">
-                    <h3>Returns</h3>
-                    <p>Returns are accepted in line with our refund policy.</p>
+                {% if product.image or product.images.exists %}
+                    <div
+                        class="thumbnail-row"
+                        aria-label="Product image thumbnails"
+                    >
+
+                        {% if product.image %}
+                            <button
+                                type="button"
+                                class="thumbnail-button active"
+                                onclick="changeImage(this)"
+                                aria-label="View main product image"
+                            >
+                                <img
+                                    src="{{ product.image.url }}"
+                                    alt="{{ product.name }}"
+                                >
+                            </button>
+                        {% endif %}
+
+                        {% for img in product.images.all %}
+                            <button
+                                type="button"
+                                class="thumbnail-button"
+                                onclick="changeImage(this)"
+                                aria-label="View additional image of {{ product.name }}"
+                            >
+                                <img
+                                    src="{{ img.image.url }}"
+                                    alt="{{ img.alt_text|default:product.name }}"
+                                    loading="lazy"
+                                >
+                            </button>
+                        {% endfor %}
+
+                    </div>
+                {% endif %}
+
+            </section>
+
+            <section class="product-info">
+
+                <span class="product-category">
+                    {% if product.category %}
+                        {{ product.get_category_display }}
+                    {% else %}
+                        THORNBYHEK Collection
+                    {% endif %}
+                </span>
+
+                <div class="title-row">
+
+                    <h1>{{ product.name }}</h1>
+
+                    <form
+                        method="post"
+                        action="{% url 'toggle_favourite' product.id %}"
+                        class="favourite-form"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="favourite-btn"
+                            aria-label="Toggle favourite for {{ product.name }}"
+                        >
+                            {% if product.id in favourites %}
+                                ♥
+                            {% else %}
+                                ♡
+                            {% endif %}
+                        </button>
+                    </form>
+
                 </div>
 
-                <div class="detail-row">
-                    <h3>Support</h3>
-                    <p>For help with your order, contact the THORNBYHEK support team.</p>
+                <p class="price">
+
+                    {% if product.sale_price %}
+                        <span class="old-price">
+                            £{{ product.price }}
+                        </span>
+
+                        <span class="new-price">
+                            £{{ product.sale_price }}
+                        </span>
+                    {% else %}
+                        <span class="new-price">
+                            £{{ product.price }}
+                        </span>
+                    {% endif %}
+
+                </p>
+
+                {% if product.description %}
+                    <p class="product-introduction">
+                        {{ product.description|truncatewords:30 }}
+                    </p>
+                {% endif %}
+
+                {% if product.sold_out %}
+
+                    {% if product.sizes.exists %}
+                        <div class="size-section">
+
+                            <div class="size-heading">
+                                <p class="size-label">
+                                    Select size
+                                </p>
+                            </div>
+
+                            <div class="size-options">
+                                {% for size in product.sizes.all %}
+                                    <span class="size-disabled">
+                                        {{ size.size }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+                    {% endif %}
+
+                    <p class="status sold">
+                        Currently unavailable
+                    </p>
+
+                    <button
+                        type="button"
+                        class="buy-btn"
+                        disabled
+                    >
+                        Sold out
+                    </button>
+
+                {% else %}
+
+                    <form
+                        method="post"
+                        action="{% url 'add_to_cart' product.id %}"
+                    >
+                        {% csrf_token %}
+
+                        {% if product.sizes.exists %}
+                            <div class="size-section">
+
+                                <div class="size-heading">
+                                    <p class="size-label">
+                                        Select size
+                                    </p>
+
+                                    <a
+                                        href="#"
+                                        class="size-guide"
+                                    >
+                                        Size guide
+                                    </a>
+                                </div>
+
+                                <div class="size-options">
+
+                                    {% for size in product.sizes.all %}
+
+                                        {% if size.stock > 0 %}
+                                            <label class="size-option">
+
+                                                <input
+                                                    type="radio"
+                                                    name="size"
+                                                    value="{{ size.size }}"
+                                                    required
+                                                >
+
+                                                <span>
+                                                    {{ size.size }}
+                                                </span>
+
+                                            </label>
+                                        {% else %}
+                                            <span class="size-disabled">
+                                                {{ size.size }}
+                                            </span>
+                                        {% endif %}
+
+                                    {% endfor %}
+
+                                </div>
+
+                            </div>
+                        {% endif %}
+
+                        <p class="status">
+                            Available
+                        </p>
+
+                        <button
+                            type="submit"
+                            class="buy-btn"
+                        >
+                            Add to cart
+                        </button>
+
+                    </form>
+
+                {% endif %}
+
+                <div class="shopping-benefits">
+
+                    <div class="benefit-item">
+                        <i class="fa-solid fa-truck-fast"></i>
+
+                        <span>
+                            UK delivery<br>
+                            in 1–2 days
+                        </span>
+                    </div>
+
+                    <div class="benefit-item">
+                        <i class="fa-solid fa-lock"></i>
+
+                        <span>
+                            Secure<br>
+                            checkout
+                        </span>
+                    </div>
+
+                    <div class="benefit-item">
+                        <i class="fa-solid fa-rotate-left"></i>
+
+                        <span>
+                            Returns<br>
+                            accepted
+                        </span>
+                    </div>
+
                 </div>
-            </div>
+
+                <div class="details-panel">
+
+                    <section class="detail-row open">
+
+                        <button
+                            type="button"
+                            class="detail-toggle"
+                            aria-expanded="true"
+                        >
+                            Description
+                        </button>
+
+                        <div class="detail-content">
+                            <p>
+                                {{ product.description|default:"Crafted with exceptional attention to detail, this piece combines premium materials, refined design and everyday practicality. Designed to deliver lasting quality and timeless style, it is a statement addition to any collection." }}
+                            </p>
+                        </div>
+
+                    </section>
+
+                    <section class="detail-row">
+
+                        <button
+                            type="button"
+                            class="detail-toggle"
+                            aria-expanded="false"
+                        >
+                            Delivery
+                        </button>
+
+                        <div class="detail-content">
+                            <p>
+                                UK delivery normally takes 1–2 working days
+                                from the date your order is placed.
+                            </p>
+                        </div>
+
+                    </section>
+
+                    <section class="detail-row">
+
+                        <button
+                            type="button"
+                            class="detail-toggle"
+                            aria-expanded="false"
+                        >
+                            Returns
+                        </button>
+
+                        <div class="detail-content">
+                            <p>
+                                Returns are accepted in accordance with the
+                                THORNBYHEK refund and returns policy.
+                            </p>
+                        </div>
+
+                    </section>
+
+                    <section class="detail-row">
+
+                        <button
+                            type="button"
+                            class="detail-toggle"
+                            aria-expanded="false"
+                        >
+                            Product support
+                        </button>
+
+                        <div class="detail-content">
+                            <p>
+                                For sizing, delivery or product assistance,
+                                contact the THORNBYHEK support team.
+                            </p>
+                        </div>
+
+                    </section>
+
+                </div>
+
+            </section>
+
         </div>
 
-    </div>
+    </main>
+
 </div>
 
 <script>
-function changeImage(el) {
-    document.getElementById("mainImage").src = el.src;
+function changeImage(button) {
+    const mainImage = document.getElementById("mainImage");
+    const thumbnailImage = button.querySelector("img");
+
+    if (!mainImage || !thumbnailImage) {
+        return;
+    }
+
+    mainImage.style.opacity = "0";
+
+    window.setTimeout(function () {
+        mainImage.src = thumbnailImage.src;
+        mainImage.alt = thumbnailImage.alt;
+        mainImage.style.opacity = "1";
+    }, 150);
+
+    document
+        .querySelectorAll(".thumbnail-button")
+        .forEach(function (thumbnail) {
+            thumbnail.classList.remove("active");
+        });
+
+    button.classList.add("active");
 }
+
+document
+    .querySelectorAll(".detail-toggle")
+    .forEach(function (button) {
+        button.addEventListener("click", function () {
+            const row = button.closest(".detail-row");
+            const isOpen = row.classList.contains("open");
+
+            row.classList.toggle("open");
+            button.setAttribute("aria-expanded", String(!isOpen));
+        });
+    });
 </script>
 
 {% endblock %}
