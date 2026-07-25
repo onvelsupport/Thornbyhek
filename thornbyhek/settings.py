@@ -14,14 +14,14 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     'thornbyhek.onrender.com',
-    'www.thornbyhekatches.com',
-    'thornbyhekatches.com',
+    'www.thornbyhek.com',
+    'thornbyhek.com',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://thornbyhek.onrender.com/',
-    'https://www.thornbyhekatches.com',
-    'https://thornbyhekatches.com',
+    'https://thornbyhek.onrender.com',
+    'https://www.thornbyhek.com',
+    'https://thornbyhek.com',
 ]
 
 INSTALLED_APPS = [
