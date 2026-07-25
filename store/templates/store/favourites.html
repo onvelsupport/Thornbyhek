@@ -1,234 +1,643 @@
 {% extends 'store/base.html' %}
 {% load static %}
 
-{% block title %}ASCOTW Watches | All Models{% endblock %}
+{% block title %}THORNBYHEK | Favourites{% endblock %}
 
 {% block extra_css %}
 <style>
+:root {
+    --black: #0a0a0a;
+    --white: #ffffff;
+    --cream: #f4f1eb;
+    --soft-grey: #f5f5f5;
+    --border: #dedede;
+    --grey: #747474;
+    --gold: #8b6b19;
+    --green: #0d5c3f;
+    --heading-font: "Cormorant Garamond", Georgia, serif;
+    --body-font: "Manrope", Arial, sans-serif;
+}
+
+.favourites-page {
+    background: var(--white);
+}
+
+/* HERO */
+
 .page-hero {
+    padding: 85px 5% 55px;
+    background: var(--cream);
     text-align: center;
-    padding: 55px 20px 45px;
 }
 
 .page-hero small {
     display: block;
-    letter-spacing: 7px;
-    font-size: 15px;
-    margin-bottom: 10px;
-    font-weight: 500;
+    margin-bottom: 14px;
+    color: var(--grey);
+    font-family: var(--body-font);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
 }
 
 .page-hero h1 {
-    font-size: 68px;
     margin: 0;
-    line-height: 1;
-    font-weight: 700;
+    color: var(--black);
+    font-family: var(--heading-font);
+    font-size: clamp(55px, 7vw, 90px);
+    font-weight: 500;
+    letter-spacing: -3px;
+    line-height: 0.95;
 }
 
-.old-price {
-    color: #888;
-    text-decoration: line-through;
-    margin-right: 8px;
+.page-hero p {
+    max-width: 520px;
+    margin: 18px auto 0;
+    color: var(--grey);
+    font-family: var(--body-font);
+    font-size: 13px;
+    line-height: 1.8;
 }
 
-.new-price {
-    color: #111;
-    font-weight: 700;
+/* TABS */
+
+.tabs-wrapper {
+    border-bottom: 1px solid var(--border);
+    background: var(--white);
 }
 
 .tabs {
     display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 110px;
-    margin-top: 50px;
-    font-size: 15px;
-    font-weight: 700;
+    gap: 70px;
+    min-height: 68px;
 }
 
 .tab-item {
+    position: relative;
+    padding: 25px 12px 21px;
+    color: var(--grey);
+    font-family: var(--body-font);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
     text-decoration: none;
-    color: #111;
-    padding: 0 100px 18px;
-    border-bottom: 3px solid transparent;
+    text-transform: uppercase;
+}
+
+.tab-item::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    background: var(--black);
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
 }
 
 .tab-item:hover,
-.active-tab {
-    color: #007a3d;
+.tab-item.active-tab {
+    color: var(--black);
 }
 
-.active-tab {
-    border-bottom: 3px solid #007a3d;
+.tab-item.active-tab::after {
+    transform: scaleX(1);
 }
+
+/* CONTENT */
+
+.favourites-container {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 55px 4% 100px;
+}
+
+/* TOOLBAR */
 
 .filter-sort-bar {
     display: flex;
+    align-items: flex-end;
     justify-content: space-between;
-    align-items: center;
-    padding: 45px 6% 30px;
+    gap: 25px;
+    margin-bottom: 34px;
 }
 
-.filter-left select,
-.sort-right select {
-    border: none;
-    background: transparent;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    outline: none;
+.toolbar-heading h2 {
+    margin: 0;
+    color: var(--black);
+    font-family: var(--heading-font);
+    font-size: 38px;
+    font-weight: 600;
+    letter-spacing: -1.5px;
 }
 
-.watch-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+.toolbar-heading p {
+    margin: 8px 0 0;
+    color: var(--grey);
+    font-family: var(--body-font);
+    font-size: 12px;
+}
+
+.toolbar-controls {
+    display: flex;
     gap: 12px;
-    padding: 0 6%;
 }
 
-.watch-card {
-    background: #f8f8f8;
-    min-height: 400px;
-    padding: 45px 55px;
+.select-box {
     position: relative;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: center;
-    overflow: hidden;
 }
+
+.select-box select {
+    min-width: 190px;
+    height: 47px;
+    padding: 0 42px 0 15px;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--white);
+    color: var(--black);
+    font-family: var(--body-font);
+    font-size: 11px;
+    font-weight: 600;
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.select-box::after {
+    content: "⌄";
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    color: var(--grey);
+    font-family: var(--body-font);
+    font-size: 14px;
+    transform: translateY(-55%);
+    pointer-events: none;
+}
+
+/* PRODUCT GRID */
+
+.favourites-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 34px 16px;
+}
+
+.product-card {
+    position: relative;
+    min-width: 0;
+    background: var(--white);
+}
+
+/* IMAGE */
+
+.product-image {
+    position: relative;
+    display: block;
+    height: 410px;
+    overflow: hidden;
+    background: var(--soft-grey);
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.45s ease;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.035);
+}
+
+.product-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: var(--black);
+    font-family: var(--heading-font);
+    font-size: 23px;
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+.product-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 3;
+    padding: 7px 10px;
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body-font);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+}
+
+.product-badge.sale {
+    background: var(--green);
+}
+
+/* FAVOURITE BUTTON */
 
 .heart-form {
     position: absolute;
-    right: 25px;
-    bottom: 25px;
+    top: 13px;
+    right: 13px;
     z-index: 5;
 }
 
 .heart {
-    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 39px;
+    height: 39px;
+    padding: 0;
     border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.94);
+    color: var(--black);
+    font-family: var(--body-font);
+    font-size: 20px;
     cursor: pointer;
-    font-size: 28px;
-    font-weight: 900;
-    color: #007a3d;
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
 }
 
 .heart:hover {
-    transform: scale(1.15);
+    background: var(--white);
+    transform: scale(1.08);
 }
 
-.watch-info h2 {
-    font-size: 22px;
-    margin: 0 0 8px;
+/* PRODUCT DETAILS */
+
+.product-details {
+    padding: 17px 2px 4px;
 }
 
-.watch-info p {
-    font-size: 14px;
-    margin: 6px 0;
-    line-height: 1.45;
+.product-category {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--grey);
+    font-family: var(--body-font);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
 }
 
-.watch-img {
-    text-align: center;
+.product-details h2 {
+    margin: 0;
+    font-family: var(--heading-font);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    line-height: 1.15;
 }
 
-.watch-img img {
-    max-width: 100%;
-    max-height: 300px;
-    object-fit: contain;
+.product-details h2 a {
+    color: var(--black);
+    text-decoration: none;
 }
+
+.product-description {
+    margin: 9px 0 0;
+    color: var(--grey);
+    font-family: var(--body-font);
+    font-size: 11px;
+    line-height: 1.65;
+}
+
+.product-price {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 11px;
+}
+
+.old-price {
+    color: #929292;
+    font-family: var(--body-font);
+    font-size: 11px;
+    text-decoration: line-through;
+}
+
+.new-price {
+    color: var(--black);
+    font-family: var(--body-font);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.view-product {
+    display: inline-block;
+    margin-top: 13px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--black);
+    color: var(--black);
+    font-family: var(--body-font);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+/* PROMO CARD */
 
 .promo-card {
-    background: #eef1f2;
-    min-height: 400px;
-    padding: 55px;
+    grid-column: span 2;
+    position: relative;
+    min-height: 500px;
+    overflow: hidden;
+    background: var(--black);
+    color: var(--white);
+}
+
+.promo-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.9),
+            rgba(0, 0, 0, 0.25)
+        ),
+        url("{% static 'store/images/thornbyhek-editorial.jpg' %}")
+        center / cover no-repeat;
+}
+
+.promo-content {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    max-width: 540px;
+    min-height: 500px;
+    padding: 48px;
 }
 
-.promo-card h2 {
-    font-size: 22px;
+.promo-content small {
+    display: block;
+    margin-bottom: 14px;
+    font-family: var(--body-font);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
 }
 
-.promo-card p {
-    font-size: 14px;
+.promo-content h2 {
+    margin: 0;
+    font-family: var(--heading-font);
+    font-size: clamp(43px, 5vw, 68px);
+    font-weight: 500;
+    letter-spacing: -2.5px;
+    line-height: 0.95;
 }
 
-@media (max-width: 900px) {
-    .page-hero {
-        padding: 40px 16px 30px;
+.promo-content p {
+    margin: 20px 0 25px;
+    color: rgba(255, 255, 255, 0.73);
+    font-family: var(--body-font);
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.promo-content a {
+    width: fit-content;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--white);
+    color: var(--white);
+    font-family: var(--body-font);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+/* EMPTY STATE */
+
+.empty-state {
+    grid-column: 1 / -1;
+    padding: 100px 30px;
+    background: var(--cream);
+    text-align: center;
+}
+
+.empty-state-icon {
+    margin-bottom: 22px;
+    color: var(--black);
+    font-size: 36px;
+}
+
+.empty-state h2 {
+    margin: 0;
+    font-family: var(--heading-font);
+    font-size: 42px;
+    font-weight: 600;
+    letter-spacing: -1.5px;
+}
+
+.empty-state p {
+    max-width: 430px;
+    margin: 14px auto 25px;
+    color: var(--grey);
+    font-family: var(--body-font);
+    font-size: 12px;
+    line-height: 1.75;
+}
+
+.empty-state a {
+    display: inline-block;
+    padding: 14px 27px;
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body-font);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+/* TABLET */
+
+@media (max-width: 1100px) {
+    .favourites-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    .page-hero small {
-        font-size: 11px;
-        letter-spacing: 4px;
-    }
-
-    .page-hero h1 {
-        font-size: 42px;
-    }
-
-    .tabs {
-        gap: 35px;
-        margin-top: 35px;
-        font-size: 13px;
-    }
-
-    .tab-item {
-        padding: 0 20px 12px;
-    }
-
-    .filter-sort-bar {
-        padding: 28px 16px 22px;
-    }
-
-    .filter-left select,
-    .sort-right select {
-        font-size: 13px;
-        max-width: 150px;
-    }
-
-    .watch-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        padding: 0 12px;
-    }
-
-    .watch-card {
-        grid-template-columns: 1fr;
-        padding: 20px 12px;
-        min-height: 260px;
-    }
-
-    .watch-info h2 {
-        font-size: 16px;
-    }
-
-    .watch-info p {
-        font-size: 12px;
-    }
-
-    .watch-img img {
-        max-height: 150px;
-        width: 100%;
-        object-fit: contain;
-        margin-top: 10px;
-    }
-
-    .heart-form {
-        top: auto;
-        right: 12px;
-        bottom: 12px;
-        left: auto;
-    }
-
-    .heart {
-        font-size: 20px;
+    .product-image {
+        height: 360px;
     }
 
     .promo-card {
-        min-height: 260px;
-        padding: 24px 16px;
+        grid-column: span 2;
+    }
+}
+
+/* MOBILE */
+
+@media (max-width: 750px) {
+    .page-hero {
+        padding: 55px 20px 42px;
+    }
+
+    .page-hero h1 {
+        font-size: 56px;
+        letter-spacing: -2px;
+    }
+
+    .page-hero p {
+        font-size: 12px;
+    }
+
+    .tabs {
+        justify-content: flex-start;
+        gap: 28px;
+        min-height: 58px;
+        padding: 0 18px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab-item {
+        flex-shrink: 0;
+        padding: 22px 4px 18px;
+        font-size: 8px;
+    }
+
+    .favourites-container {
+        padding: 38px 12px 70px;
+    }
+
+    .filter-sort-bar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .toolbar-heading h2 {
+        font-size: 32px;
+    }
+
+    .toolbar-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .select-box select {
+        width: 100%;
+        min-width: 0;
+        font-size: 9px;
+    }
+
+    .favourites-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 27px 9px;
+    }
+
+    .product-image {
+        height: 260px;
+    }
+
+    .product-badge {
+        top: 8px;
+        left: 8px;
+        padding: 6px 8px;
+        font-size: 6px;
+    }
+
+    .heart-form {
+        top: 7px;
+        right: 7px;
+    }
+
+    .heart {
+        width: 33px;
+        height: 33px;
+        font-size: 17px;
+    }
+
+    .product-details {
+        padding: 12px 1px 4px;
+    }
+
+    .product-category {
+        font-size: 7px;
+    }
+
+    .product-details h2 {
+        font-size: 17px;
+    }
+
+    .product-description {
+        display: none;
+    }
+
+    .old-price {
+        font-size: 9px;
+    }
+
+    .new-price {
+        font-size: 11px;
+    }
+
+    .view-product {
+        font-size: 7px;
+    }
+
+    .promo-card {
+        grid-column: 1 / -1;
+        min-height: 430px;
+    }
+
+    .promo-content {
+        min-height: 430px;
+        padding: 30px 24px;
+    }
+
+    .promo-content h2 {
+        font-size: 46px;
+        letter-spacing: -2px;
+    }
+
+    .empty-state {
+        padding: 75px 22px;
+    }
+
+    .empty-state h2 {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 420px) {
+    .toolbar-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .product-image {
+        height: 225px;
+    }
+
+    .page-hero h1 {
+        font-size: 49px;
     }
 }
 </style>
@@ -236,102 +645,302 @@
 
 {% block content %}
 
-<section class="page-hero">
-    <small>ASCOT WATCHES</small>
-    <h2>Favourites</h2>
+<div class="favourites-page">
 
-    <div class="tabs">
-    <a href="{% url 'home' %}" class="tab-item">
-        Model View
-    </a>
+    <section class="page-hero">
+        <small>THORNBYHEK</small>
 
-    <a href="{% url 'favourites' %}" class="tab-item active-tab">
-        Favourites
-    </a>
-</div>
-</section>
+        <h1>Your favourites</h1>
 
-<section class="filter-sort-bar">
+        <p>
+            A personal selection of the THORNBYHEK pieces you have saved.
+        </p>
+    </section>
 
-    <div class="filter-left">
-        <form method="get">
-            <input type="hidden" name="sort" value="{{ current_sort }}">
+    <div class="tabs-wrapper">
+        <nav class="tabs">
 
-            <select name="category" onchange="this.form.submit()">
-                <option value="">All Items</option>
-                <option value="men" {% if current_category == 'men' %}selected{% endif %}>Men's Watches</option>
-                <option value="women" {% if current_category == 'women' %}selected{% endif %}>Women's Watches</option>
-                <option value="unisex" {% if current_category == 'unisex' %}selected{% endif %}>Unisex Watches</option>
-                <option value="accessories" {% if current_category == 'accessories' %}selected{% endif %}>Accessories</option>
-            </select>
-        </form>
+            <a
+                href="{% url 'home' %}"
+                class="tab-item"
+            >
+                Shop Collection
+            </a>
+
+            <a
+                href="{% url 'favourites' %}"
+                class="tab-item active-tab"
+            >
+                Favourites
+            </a>
+
+        </nav>
     </div>
 
-    <div class="sort-right">
-        <form method="get">
-            <input type="hidden" name="category" value="{{ current_category }}">
+    <section class="favourites-container">
 
-            <select name="sort" onchange="this.form.submit()">
-                <option value="new" {% if current_sort == 'new' %}selected{% endif %}>New In</option>
-                <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
-                <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
-                <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name A-Z</option>
-            </select>
-        </form>
-    </div>
+        <div class="filter-sort-bar">
 
-</section>
+            <div class="toolbar-heading">
+                <h2>Saved pieces</h2>
 
-<section class="watch-grid">
-    {% for product in products %}
-        <div class="watch-card">
-            <form method="post" action="{% url 'toggle_favourite' product.id %}" class="heart-form">
-                {% csrf_token %}
-                <button type="submit" class="heart">
-    {% if product.id in favourites %}
-        ♥
-    {% else %}
-        ♡
-    {% endif %}
-</button>
-            </form>
-
-            <a href="{% url 'product_detail' product.slug %}" class="watch-info">
-                <h2>{{ product.name }}</h2>
-                <p>{{ product.description|truncatewords:8 }}</p>
                 <p>
-    {% if product.sale_price %}
-        <span class="old-price">£{{ product.price }}</span>
-        <span class="new-price">£{{ product.sale_price }}</span>
-    {% else %}
-        <span class="new-price">£{{ product.price }}</span>
-    {% endif %}
-    ⓘ
-</p>
-            </a>
-
-            <a href="{% url 'product_detail' product.slug %}" class="watch-img">
-                {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
-                {% else %}
-                    <div style="height:300px;display:flex;align-items:center;justify-content:center;background:#eee;">
-                        ASCOTW
-                    </div>
-                {% endif %}
-            </a>
-        </div>
-    {% empty %}
-        <div class="watch-card">
-            <div class="watch-info">
-                <h2>No Items yet</h2>
+                    Review and manage the pieces in your favourites.
+                </p>
             </div>
-        </div>
-    {% endfor %}
 
-    <div class="promo-card">
-        <h2>Brilliant like no other</h2>
-        <p>Discover the signature details behind ASCOTW.</p>
-    </div>
-</section>
+            <div class="toolbar-controls">
+
+                <form method="get" class="select-box">
+                    <input
+                        type="hidden"
+                        name="sort"
+                        value="{{ current_sort }}"
+                    >
+
+                    <select
+                        name="category"
+                        onchange="this.form.submit()"
+                        aria-label="Filter favourite products"
+                    >
+                        <option value="">
+                            All Items
+                        </option>
+
+                        <option
+                            value="men"
+                            {% if current_category == 'men' %}selected{% endif %}
+                        >
+                            Men
+                        </option>
+
+                        <option
+                            value="women"
+                            {% if current_category == 'women' %}selected{% endif %}
+                        >
+                            Women
+                        </option>
+
+                        <option
+                            value="unisex"
+                            {% if current_category == 'unisex' %}selected{% endif %}
+                        >
+                            Unisex
+                        </option>
+
+                        <option
+                            value="accessories"
+                            {% if current_category == 'accessories' %}selected{% endif %}
+                        >
+                            Accessories
+                        </option>
+                    </select>
+                </form>
+
+                <form method="get" class="select-box">
+                    <input
+                        type="hidden"
+                        name="category"
+                        value="{{ current_category }}"
+                    >
+
+                    <select
+                        name="sort"
+                        onchange="this.form.submit()"
+                        aria-label="Sort favourite products"
+                    >
+                        <option
+                            value="new"
+                            {% if current_sort == 'new' %}selected{% endif %}
+                        >
+                            New In
+                        </option>
+
+                        <option
+                            value="price_low"
+                            {% if current_sort == 'price_low' %}selected{% endif %}
+                        >
+                            Price: Low to High
+                        </option>
+
+                        <option
+                            value="price_high"
+                            {% if current_sort == 'price_high' %}selected{% endif %}
+                        >
+                            Price: High to Low
+                        </option>
+
+                        <option
+                            value="name"
+                            {% if current_sort == 'name' %}selected{% endif %}
+                        >
+                            Name A–Z
+                        </option>
+                    </select>
+                </form>
+
+            </div>
+
+        </div>
+
+        <div class="favourites-grid">
+
+            {% for product in products %}
+
+                <article class="product-card">
+
+                    <a
+                        href="{% url 'product_detail' product.slug %}"
+                        class="product-image"
+                    >
+                        {% if product.sale_price %}
+                            <span class="product-badge sale">
+                                Sale
+                            </span>
+                        {% else %}
+                            <span class="product-badge">
+                                Saved
+                            </span>
+                        {% endif %}
+
+                        {% if product.image %}
+                            <img
+                                src="{{ product.image.url }}"
+                                alt="{{ product.name }}"
+                                loading="lazy"
+                            >
+                        {% else %}
+                            <div class="product-placeholder">
+                                THORNBYHEK
+                            </div>
+                        {% endif %}
+                    </a>
+
+                    <form
+                        method="post"
+                        action="{% url 'toggle_favourite' product.id %}"
+                        class="heart-form"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="heart"
+                            aria-label="Remove {{ product.name }} from favourites"
+                        >
+                            {% if product.id in favourites %}
+                                ♥
+                            {% else %}
+                                ♡
+                            {% endif %}
+                        </button>
+                    </form>
+
+                    <div class="product-details">
+
+                        <span class="product-category">
+                            {% if product.category %}
+                                {{ product.get_category_display }}
+                            {% else %}
+                                THORNBYHEK
+                            {% endif %}
+                        </span>
+
+                        <h2>
+                            <a href="{% url 'product_detail' product.slug %}">
+                                {{ product.name }}
+                            </a>
+                        </h2>
+
+                        {% if product.description %}
+                            <p class="product-description">
+                                {{ product.description|truncatewords:12 }}
+                            </p>
+                        {% endif %}
+
+                        <div class="product-price">
+
+                            {% if product.sale_price %}
+                                <span class="old-price">
+                                    £{{ product.price }}
+                                </span>
+
+                                <span class="new-price">
+                                    £{{ product.sale_price }}
+                                </span>
+                            {% else %}
+                                <span class="new-price">
+                                    £{{ product.price }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <a
+                            href="{% url 'product_detail' product.slug %}"
+                            class="view-product"
+                        >
+                            View product
+                        </a>
+
+                    </div>
+
+                </article>
+
+            {% empty %}
+
+                <div class="empty-state">
+
+                    <div class="empty-state-icon">
+                        <i class="fa-regular fa-heart"></i>
+                    </div>
+
+                    <h2>No favourites yet</h2>
+
+                    <p>
+                        Save pieces you love by selecting the heart icon on
+                        any product in the THORNBYHEK collection.
+                    </p>
+
+                    <a href="{% url 'home' %}">
+                        Explore the collection
+                    </a>
+
+                </div>
+
+            {% endfor %}
+
+            {% if products %}
+                <article class="promo-card">
+
+                    <div class="promo-content">
+
+                        <small>
+                            THORNBYHEK Editorial
+                        </small>
+
+                        <h2>
+                            Brilliant like no other.
+                        </h2>
+
+                        <p>
+                            Discover the distinctive design language and
+                            signature details behind every THORNBYHEK piece.
+                        </p>
+
+                        <a href="{% url 'home' %}">
+                            Continue shopping
+                        </a>
+
+                    </div>
+
+                </article>
+            {% endif %}
+
+        </div>
+
+    </section>
+
+</div>
 
 {% endblock %}

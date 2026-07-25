@@ -13,15 +13,15 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    'ascotw.onrender.com',
-    'www.ascotwatches.com',
-    'ascotwatches.com',
+    'thornbyhek.onrender.com',
+    'www.thornbyhekatches.com',
+    'thornbyhekatches.com',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://ascotw.onrender.com/',
-    'https://www.ascotwatches.com',
-    'https://ascotwatches.com',
+    'https://thornbyhek.onrender.com/',
+    'https://www.thornbyhekatches.com',
+    'https://thornbyhekatches.com',
 ]
 
 INSTALLED_APPS = [
@@ -53,7 +53,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'ascotw.urls'
+ROOT_URLCONF = 'thornbyhek.urls'
 
 TEMPLATES = [
     {
@@ -72,7 +72,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'ascotw.wsgi.application'
+WSGI_APPLICATION = 'thornbyhek.wsgi.application'
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -125,9 +125,9 @@ SQUARE_ENVIRONMENT = os.getenv("SQUARE_ENVIRONMENT", "production")
 SQUARE_WEBHOOK_SIGNATURE_KEY = os.getenv("SQUARE_WEBHOOK_SIGNATURE_KEY")
 SQUARE_WEBHOOK_URL = os.getenv(
     "SQUARE_WEBHOOK_URL",
-    "https://www.ascotw.com/square/webhook/"
+    "https://www.thornbyhek.com/square/webhook/"
 )
 
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "ascotw <orders@ascotw.shop>")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "thornbyhek <orders@thornbyhek.shop>")

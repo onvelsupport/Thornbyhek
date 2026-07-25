@@ -1,6 +1,6 @@
 Hello {{ order.full_name }},
 
-Thank you for your order from ASCOTW.
+Thank you for your order from THORNBYHEK.
 
 Order Number: {{ order.order_number }}
 
@@ -29,9 +29,9 @@ Track your order:
 
 We will notify you by email once your order has been dispatched.
 
-Thank you for choosing ASCOTW.
+Thank you for choosing THORNBYHEK.
 
-ASCOTW
-https://ascotw.com
+THORNBYHEK
+https://thornbyhek.com
 
 
