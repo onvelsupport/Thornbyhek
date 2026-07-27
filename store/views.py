@@ -501,10 +501,19 @@ def _handle_stripe_webhook(
 
     session_id = session["id"]
     payment_status = session["payment_status"]
-    metadata = dict(session["metadata"] or {})
+    metadata = session["metadata"]
 
-    order_id = metadata.get("order_id")
-    selected_account = metadata.get("stripe_account")
+    order_id = (
+    metadata["order_id"]
+    if metadata and "order_id" in metadata
+    else None
+    )
+
+    selected_account = (
+    metadata["stripe_account"]
+    if metadata and "stripe_account" in metadata
+    else None
+    )
 
     print(
         f"Stripe Account {account_name}: Session ID:",
