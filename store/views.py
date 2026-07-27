@@ -445,23 +445,25 @@ def collection(request):
 def _handle_stripe_webhook(
     request,
     webhook_secret,
-    expected_livemode,
     account_name,
 ):
     if request.method != "POST":
         return HttpResponse(status=405)
 
-    print(f"{account_name} Stripe webhook endpoint hit")
+    print(f"Stripe Account {account_name} webhook endpoint hit")
 
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
 
     if not sig_header:
-        print(f"{account_name}: Stripe signature missing")
+        print(f"Stripe Account {account_name}: Signature missing")
         return HttpResponse(status=400)
 
     if not webhook_secret:
-        print(f"{account_name}: Webhook secret is not configured")
+        print(
+            f"Stripe Account {account_name}: "
+            "Webhook secret is not configured"
+        )
         return HttpResponse(status=500)
 
     try:
@@ -472,53 +474,83 @@ def _handle_stripe_webhook(
         )
 
     except ValueError as error:
-        print(f"{account_name}: Invalid payload:", str(error))
-        return HttpResponse(status=400)
-
-    except stripe.error.SignatureVerificationError as error:
-        print(f"{account_name}: Invalid signature:", str(error))
-        return HttpResponse(status=400)
-
-    print(f"{account_name}: Event verified:", event["type"])
-
-    # Prevent test events from reaching the live handler and vice versa.
-    if event.get("livemode") != expected_livemode:
         print(
-            f"{account_name}: Incorrect Stripe mode. "
-            f"Expected livemode={expected_livemode}, "
-            f"received livemode={event.get('livemode')}"
+            f"Stripe Account {account_name}: Invalid payload:",
+            str(error),
         )
         return HttpResponse(status=400)
 
-    if event["type"] != "checkout.session.completed":
+    except stripe.error.SignatureVerificationError as error:
+        print(
+            f"Stripe Account {account_name}: Invalid signature:",
+            str(error),
+        )
+        return HttpResponse(status=400)
+
+    event_type = event["type"]
+
+    print(
+        f"Stripe Account {account_name}: "
+        f"Event verified: {event_type}"
+    )
+
+    if event_type != "checkout.session.completed":
         return HttpResponse(status=200)
 
     session = event["data"]["object"]
-    session_id = session.get("id")
-    payment_status = session.get("payment_status")
-    metadata = session.get("metadata") or {}
-    order_id = metadata.get("order_id")
 
-    print(f"{account_name}: Session ID:", session_id)
-    print(f"{account_name}: Payment status:", payment_status)
-    print(f"{account_name}: Order ID:", order_id)
+    session_id = session["id"]
+    payment_status = session["payment_status"]
+    metadata = session["metadata"] or {}
+
+    order_id = metadata.get("order_id")
+    selected_account = metadata.get("stripe_account")
+
+    print(
+        f"Stripe Account {account_name}: Session ID:",
+        session_id,
+    )
+    print(
+        f"Stripe Account {account_name}: Payment status:",
+        payment_status,
+    )
+    print(
+        f"Stripe Account {account_name}: Order ID:",
+        order_id,
+    )
+
+    if selected_account and selected_account != account_name:
+        print(
+            f"Stripe Account {account_name}: "
+            f"Metadata account mismatch. "
+            f"Received {selected_account}"
+        )
+        return HttpResponse(status=400)
 
     if not order_id:
-        print(f"{account_name}: No order_id found in metadata")
+        print(
+            f"Stripe Account {account_name}: "
+            "No order_id found in metadata"
+        )
         return HttpResponse(status=200)
 
-    # Do not fulfil an unpaid Checkout Session.
     if payment_status != "paid":
-        print(f"{account_name}: Checkout completed but payment is not paid")
+        print(
+            f"Stripe Account {account_name}: "
+            "Checkout completed but payment is not paid"
+        )
         return HttpResponse(status=200)
 
     try:
         with transaction.atomic():
-            order = Order.objects.select_for_update().get(id=order_id)
+            order = Order.objects.select_for_update().get(
+                id=order_id
+            )
 
             if order.is_paid:
                 print(
-                    f"{account_name}: Order {order.order_number} "
+                    f"Stripe Account {account_name}: "
+                    f"Order {order.order_number} "
                     "was already marked as paid"
                 )
                 return HttpResponse(status=200)
@@ -533,52 +565,58 @@ def _handle_stripe_webhook(
             )
 
         print(
-            f"{account_name}: Order {order.order_number} "
-            "marked as paid"
+            f"Stripe Account {account_name}: "
+            f"Order {order.order_number} marked as paid"
         )
 
         try:
             send_order_confirmation_email(order, session)
+
             print(
-                f"{account_name}: Confirmation email sent to:",
-                order.email,
+                f"Stripe Account {account_name}: "
+                f"Confirmation email sent to {order.email}"
             )
+
         except Exception as email_error:
             print(
-                f"{account_name}: Email sending failed:",
+                f"Stripe Account {account_name}: "
+                "Email sending failed:",
                 str(email_error),
             )
 
     except Order.DoesNotExist:
-        print(f"{account_name}: Order not found:", order_id)
+        print(
+            f"Stripe Account {account_name}: "
+            f"Order not found: {order_id}"
+        )
         return HttpResponse(status=200)
 
     except Exception as error:
-        print(f"{account_name}: Order processing error:", str(error))
-
-        # Return 500 so Stripe retries the webhook.
+        print(
+            f"Stripe Account {account_name}: "
+            "Order processing error:",
+            str(error),
+        )
         return HttpResponse(status=500)
 
     return HttpResponse(status=200)
 
 
 @csrf_exempt
-def stripe_test_webhook(request):
+def stripe_webhook_a(request):
     return _handle_stripe_webhook(
         request=request,
-        webhook_secret=settings.STRIPE_WEBHOOK_SECRET_TEST,
-        expected_livemode=False,
-        account_name="TEST",
+        webhook_secret=settings.STRIPE_WEBHOOK_SECRET_A,
+        account_name="A",
     )
 
 
 @csrf_exempt
-def stripe_live_webhook(request):
+def stripe_webhook_b(request):
     return _handle_stripe_webhook(
         request=request,
-        webhook_secret=settings.STRIPE_WEBHOOK_SECRET_LIVE,
-        expected_livemode=True,
-        account_name="LIVE",
+        webhook_secret=settings.STRIPE_WEBHOOK_SECRET_B,
+        account_name="B",
     )
     
 def search(request):
@@ -614,9 +652,11 @@ def _create_stripe_checkout(request, order_id, secret_key, account_name):
     order = get_object_or_404(Order, id=order_id)
 
     if order.is_paid:
-        return redirect('checkout_success')
+        return redirect("checkout_success")
 
-    stripe.api_key = secret_key
+    if not secret_key:
+        print(f"Stripe Account {account_name}: Secret key is not configured")
+        return redirect("checkout")
 
     line_items = []
 
@@ -627,50 +667,69 @@ def _create_stripe_checkout(request, order_id, secret_key, account_name):
             product_name = f"{product_name} - Size {item.size}"
 
         line_items.append({
-            'price_data': {
-                'currency': 'gbp',
-                'product_data': {
-                    'name': product_name,
+            "price_data": {
+                "currency": "gbp",
+                "product_data": {
+                    "name": product_name,
                 },
-                'unit_amount': int(item.price * 100),
+                "unit_amount": int(item.price * 100),
             },
-            'quantity': item.quantity,
+            "quantity": item.quantity,
         })
+
+    if not line_items:
+        print(
+            f"Stripe Account {account_name}: "
+            f"Order {order.id} has no items"
+        )
+        return redirect("checkout")
 
     try:
         checkout_session = stripe.checkout.Session.create(
-            mode='payment',
+            api_key=secret_key,
+            mode="payment",
             line_items=line_items,
             success_url=(
-                request.build_absolute_uri('/checkout/success/')
-                + '?session_id={CHECKOUT_SESSION_ID}'
+                request.build_absolute_uri("/checkout/success/")
+                + "?session_id={CHECKOUT_SESSION_ID}"
             ),
             cancel_url=request.build_absolute_uri(
-                f'/checkout/payment/{order.id}/'
+                f"/checkout/payment/{order.id}/"
             ),
             customer_email=order.email,
             metadata={
-                'order_id': str(order.id),
-                'customer_name': order.full_name,
-                'stripe_account': account_name,
+                "order_id": str(order.id),
+                "customer_name": order.full_name,
+                "stripe_account": account_name,
             },
         )
 
         order.stripe_session_id = checkout_session.id
-        order.save(update_fields=['stripe_session_id'])
+        order.save(update_fields=["stripe_session_id"])
+
+        print(
+            f"Stripe Account {account_name}: "
+            f"Checkout Session {checkout_session.id} "
+            f"created for order {order.order_number}"
+        )
 
         return redirect(checkout_session.url, code=303)
 
-    except stripe.error.StripeError as e:
-        return redirect('checkout')
+    except stripe.error.StripeError as error:
+        print(
+            f"Stripe Account {account_name}: "
+            "Checkout creation failed:",
+            str(error),
+        )
+        return redirect("checkout")
 
 
 def stripe_checkout_a(request, order_id):
     return _create_stripe_checkout(
         request=request,
         order_id=order_id,
-        secret_key=settings.STRIPE_SECRET_KEY_LIVE,
-        account_name='LIVE',
+        secret_key=settings.STRIPE_SECRET_KEY_A,
+        account_name="A",
     )
 
 
@@ -678,8 +737,8 @@ def stripe_checkout_b(request, order_id):
     return _create_stripe_checkout(
         request=request,
         order_id=order_id,
-        secret_key=settings.STRIPE_SECRET_KEY_TEST,
-        account_name='TEST',
+        secret_key=settings.STRIPE_SECRET_KEY_B,
+        account_name="B",
     )
     
 

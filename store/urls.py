@@ -31,25 +31,41 @@ urlpatterns = [
     path('favourite/toggle/<int:product_id>/', views.toggle_favourite, name='toggle_favourite'),
 
 # Payment
-path('checkout/payment/<int:order_id>/', views.choose_payment_method, name='choose_payment_method'),
-
-path('checkout/stripe-a/<int:order_id>/', views.stripe_checkout_a, name='stripe_checkout_a'),
-
-path('checkout/stripe-b/<int:order_id>/', views.stripe_checkout_b, name='stripe_checkout_b'),
-
-path('checkout/square/<int:order_id>/', views.square_checkout, name='square_checkout'),
-
-# Stripe Webhooks
 path(
-    'stripe/test/webhook/',
-    views.stripe_test_webhook,
-    name='stripe_test_webhook'
+    'checkout/payment/<int:order_id>/',
+    views.choose_payment_method,
+    name='choose_payment_method'
 ),
 
 path(
-    'stripe/live/webhook/',
-    views.stripe_live_webhook,
-    name='stripe_live_webhook'
+    'checkout/stripe-a/<int:order_id>/',
+    views.stripe_checkout_a,
+    name='stripe_checkout_a'
+),
+
+path(
+    'checkout/stripe-b/<int:order_id>/',
+    views.stripe_checkout_b,
+    name='stripe_checkout_b'
+),
+
+path(
+    'checkout/square/<int:order_id>/',
+    views.square_checkout,
+    name='square_checkout'
+),
+
+# Stripe Webhooks
+path(
+    'stripe/account-a/webhook/',
+    views.stripe_webhook_a,
+    name='stripe_webhook_a'
+),
+
+path(
+    'stripe/account-b/webhook/',
+    views.stripe_webhook_b,
+    name='stripe_webhook_b'
 ),
 
 # Square Webhook
