@@ -111,12 +111,15 @@ STORAGES = {
 #DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Stripe
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
-STRIPE_SECRET_KEY_A = os.environ.get('STRIPE_SECRET_KEY_A')
-STRIPE_SECRET_KEY_B = os.environ.get('STRIPE_SECRET_KEY_B')
+# Stripe Account A — Sandbox/Test
+STRIPE_SECRET_KEY_TEST = os.getenv("STRIPE_SECRET_KEY_TEST")
+STRIPE_PUBLIC_KEY_TEST = os.getenv("STRIPE_PUBLIC_KEY_TEST")
+STRIPE_WEBHOOK_SECRET_TEST = os.getenv("STRIPE_WEBHOOK_SECRET_TEST")
 
+# Stripe Account B — Live
+STRIPE_SECRET_KEY_LIVE = os.getenv("STRIPE_SECRET_KEY_LIVE")
+STRIPE_PUBLIC_KEY_LIVE = os.getenv("STRIPE_PUBLIC_KEY_LIVE")
+STRIPE_WEBHOOK_SECRET_LIVE = os.getenv("STRIPE_WEBHOOK_SECRET_LIVE")
 
 # Square
 SQUARE_ACCESS_TOKEN = os.getenv("SQUARE_ACCESS_TOKEN")

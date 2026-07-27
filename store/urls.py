@@ -16,7 +16,6 @@ urlpatterns = [
     # Checkout
     path('checkout/', views.checkout_view, name='checkout'),
     path('checkout/success/', views.checkout_success, name='checkout_success'),
-    path('stripe/webhook/', views.stripe_webhook, name='stripe_webhook'),
 
     # Information Pages
     path('contact/', views.contact, name='contact'),
@@ -40,8 +39,26 @@ path('checkout/stripe-b/<int:order_id>/', views.stripe_checkout_b, name='stripe_
 
 path('checkout/square/<int:order_id>/', views.square_checkout, name='square_checkout'),
 
-path('stripe/webhook/', views.stripe_webhook, name='stripe_webhook'),
-path('square/webhook/', views.square_webhook, name='square_webhook'),
+# Stripe Webhooks
+path(
+    'stripe/test/webhook/',
+    views.stripe_test_webhook,
+    name='stripe_test_webhook'
+),
+
+path(
+    'stripe/live/webhook/',
+    views.stripe_live_webhook,
+    name='stripe_live_webhook'
+),
+
+# Square Webhook
+path(
+    'square/webhook/',
+    views.square_webhook,
+    name='square_webhook'
+),
+
 
     path('tracking/result/', views.tracking_result, name='tracking_result'),
 

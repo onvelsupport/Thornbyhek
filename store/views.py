@@ -24,7 +24,6 @@ from django.template.loader import render_to_string
 from .models import Product, ProductSize, Order, OrderItem
 from .forms import CheckoutForm
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def get_payment_method_label(session):
@@ -443,66 +442,144 @@ def collection(request):
         'products': products
     })
 
-@csrf_exempt
-def stripe_webhook(request):
-    print("Webhook endpoint hit")
+def _handle_stripe_webhook(
+    request,
+    webhook_secret,
+    expected_livemode,
+    account_name,
+):
+    if request.method != "POST":
+        return HttpResponse(status=405)
+
+    print(f"{account_name} Stripe webhook endpoint hit")
+
+    payload = request.body
+    sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
+
+    if not sig_header:
+        print(f"{account_name}: Stripe signature missing")
+        return HttpResponse(status=400)
+
+    if not webhook_secret:
+        print(f"{account_name}: Webhook secret is not configured")
+        return HttpResponse(status=500)
 
     try:
-        payload = request.body
-        sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
-        endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
+        event = stripe.Webhook.construct_event(
+            payload=payload,
+            sig_header=sig_header,
+            secret=webhook_secret,
+        )
 
-        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-        print("Event verified:", event['type'])
-
-        if event['type'] == 'checkout.session.completed':
-            print("Checkout session completed")
-
-            session = event["data"]["object"]
-            session_id = session["id"]
-            metadata = session["metadata"]
-            order_id = metadata["order_id"]
-
-            print("Session ID:", session_id)
-            print("Order ID from metadata:", order_id)
-
-            if not order_id:
-                print("No order_id found. Stripe test event or missing metadata.")
-                return HttpResponse(status=200)
-
-            try:
-                order = Order.objects.get(id=order_id)
-                print("Order found:", order.order_number)
-            except Order.DoesNotExist:
-                print("Order not found:", order_id)
-                return HttpResponse(status=200)
-
-            if not order.is_paid:
-                order.is_paid = True
-                order.save()
-                print("Order marked as paid")
-            else:
-                print("Order was already marked as paid")
-
-            try:
-                send_order_confirmation_email(order, session)
-                print("HTML email sent successfully to:", order.email)
-            except Exception as e:
-                print("Email sending failed:", str(e))
-
-        return HttpResponse(status=200)
-
-    except ValueError as e:
-        print("Invalid payload:", str(e))
+    except ValueError as error:
+        print(f"{account_name}: Invalid payload:", str(error))
         return HttpResponse(status=400)
 
-    except stripe.error.SignatureVerificationError as e:
-        print("Invalid signature:", str(e))
+    except stripe.error.SignatureVerificationError as error:
+        print(f"{account_name}: Invalid signature:", str(error))
         return HttpResponse(status=400)
 
-    except Exception as e:
-        print("Webhook unexpected error:", str(e))
+    print(f"{account_name}: Event verified:", event["type"])
+
+    # Prevent test events from reaching the live handler and vice versa.
+    if event.get("livemode") != expected_livemode:
+        print(
+            f"{account_name}: Incorrect Stripe mode. "
+            f"Expected livemode={expected_livemode}, "
+            f"received livemode={event.get('livemode')}"
+        )
+        return HttpResponse(status=400)
+
+    if event["type"] != "checkout.session.completed":
         return HttpResponse(status=200)
+
+    session = event["data"]["object"]
+    session_id = session.get("id")
+    payment_status = session.get("payment_status")
+    metadata = session.get("metadata") or {}
+    order_id = metadata.get("order_id")
+
+    print(f"{account_name}: Session ID:", session_id)
+    print(f"{account_name}: Payment status:", payment_status)
+    print(f"{account_name}: Order ID:", order_id)
+
+    if not order_id:
+        print(f"{account_name}: No order_id found in metadata")
+        return HttpResponse(status=200)
+
+    # Do not fulfil an unpaid Checkout Session.
+    if payment_status != "paid":
+        print(f"{account_name}: Checkout completed but payment is not paid")
+        return HttpResponse(status=200)
+
+    try:
+        with transaction.atomic():
+            order = Order.objects.select_for_update().get(id=order_id)
+
+            if order.is_paid:
+                print(
+                    f"{account_name}: Order {order.order_number} "
+                    "was already marked as paid"
+                )
+                return HttpResponse(status=200)
+
+            order.is_paid = True
+            order.stripe_session_id = session_id
+            order.save(
+                update_fields=[
+                    "is_paid",
+                    "stripe_session_id",
+                ]
+            )
+
+        print(
+            f"{account_name}: Order {order.order_number} "
+            "marked as paid"
+        )
+
+        try:
+            send_order_confirmation_email(order, session)
+            print(
+                f"{account_name}: Confirmation email sent to:",
+                order.email,
+            )
+        except Exception as email_error:
+            print(
+                f"{account_name}: Email sending failed:",
+                str(email_error),
+            )
+
+    except Order.DoesNotExist:
+        print(f"{account_name}: Order not found:", order_id)
+        return HttpResponse(status=200)
+
+    except Exception as error:
+        print(f"{account_name}: Order processing error:", str(error))
+
+        # Return 500 so Stripe retries the webhook.
+        return HttpResponse(status=500)
+
+    return HttpResponse(status=200)
+
+
+@csrf_exempt
+def stripe_test_webhook(request):
+    return _handle_stripe_webhook(
+        request=request,
+        webhook_secret=settings.STRIPE_WEBHOOK_SECRET_TEST,
+        expected_livemode=False,
+        account_name="TEST",
+    )
+
+
+@csrf_exempt
+def stripe_live_webhook(request):
+    return _handle_stripe_webhook(
+        request=request,
+        webhook_secret=settings.STRIPE_WEBHOOK_SECRET_LIVE,
+        expected_livemode=True,
+        account_name="LIVE",
+    )
     
 def search(request):
     query = request.GET.get('q', '').strip()
