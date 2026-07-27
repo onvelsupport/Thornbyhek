@@ -31,10 +31,17 @@ urlpatterns = [
     path('favourites/', views.favourites, name='favourites'),
     path('favourite/toggle/<int:product_id>/', views.toggle_favourite, name='toggle_favourite'),
 
-    path('checkout/payment/<int:order_id>/', views.choose_payment_method, name='choose_payment_method'),
-    path('checkout/stripe/<int:order_id>/', views.stripe_checkout, name='stripe_checkout'),
-    path('checkout/square/<int:order_id>/', views.square_checkout, name='square_checkout'),    
-    path('square/webhook/', views.square_webhook, name='square_webhook'), 
+# Payment
+path('checkout/payment/<int:order_id>/', views.choose_payment_method, name='choose_payment_method'),
+
+path('checkout/stripe-a/<int:order_id>/', views.stripe_checkout_a, name='stripe_checkout_a'),
+
+path('checkout/stripe-b/<int:order_id>/', views.stripe_checkout_b, name='stripe_checkout_b'),
+
+path('checkout/square/<int:order_id>/', views.square_checkout, name='square_checkout'),
+
+path('stripe/webhook/', views.stripe_webhook, name='stripe_webhook'),
+path('square/webhook/', views.square_webhook, name='square_webhook'),
 
     path('tracking/result/', views.tracking_result, name='tracking_result'),
 

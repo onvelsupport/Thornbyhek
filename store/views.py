@@ -533,11 +533,13 @@ def toggle_favourite(request, product_id):
 
     return redirect(request.META.get('HTTP_REFERER', 'home'))
 
-def stripe_checkout(request, order_id):
+def _create_stripe_checkout(request, order_id, secret_key, account_name):
     order = get_object_or_404(Order, id=order_id)
 
     if order.is_paid:
         return redirect('checkout_success')
+
+    stripe.api_key = secret_key
 
     line_items = []
 
@@ -562,25 +564,46 @@ def stripe_checkout(request, order_id):
         checkout_session = stripe.checkout.Session.create(
             mode='payment',
             line_items=line_items,
-            success_url=request.build_absolute_uri('/checkout/success/') + '?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=request.build_absolute_uri(f'/checkout/payment/{order.id}/'),
+            success_url=(
+                request.build_absolute_uri('/checkout/success/')
+                + '?session_id={CHECKOUT_SESSION_ID}'
+            ),
+            cancel_url=request.build_absolute_uri(
+                f'/checkout/payment/{order.id}/'
+            ),
             customer_email=order.email,
             metadata={
                 'order_id': str(order.id),
                 'customer_name': order.full_name,
+                'stripe_account': account_name,
             },
         )
 
         order.stripe_session_id = checkout_session.id
-        order.save()
+        order.save(update_fields=['stripe_session_id'])
 
         return redirect(checkout_session.url, code=303)
 
     except stripe.error.StripeError as e:
-        return render(request, 'store/choose_payment.html', {
-            'order': order,
-            'error': str(e),
-        })
+        return redirect('checkout')
+
+
+def stripe_checkout_a(request, order_id):
+    return _create_stripe_checkout(
+        request=request,
+        order_id=order_id,
+        secret_key=settings.STRIPE_SECRET_KEY_A,
+        account_name='A',
+    )
+
+
+def stripe_checkout_b(request, order_id):
+    return _create_stripe_checkout(
+        request=request,
+        order_id=order_id,
+        secret_key=settings.STRIPE_SECRET_KEY_B,
+        account_name='B',
+    )
     
 
 def square_checkout(request, order_id):
