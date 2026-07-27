@@ -504,15 +504,15 @@ def _handle_stripe_webhook(
     metadata = session["metadata"]
 
     order_id = (
-    metadata["order_id"]
-    if metadata and "order_id" in metadata
-    else None
+        metadata["order_id"]
+        if metadata and "order_id" in metadata
+        else None
     )
 
     selected_account = (
-    metadata["stripe_account"]
-    if metadata and "stripe_account" in metadata
-    else None
+        metadata["stripe_account"]
+        if metadata and "stripe_account" in metadata
+        else None
     )
 
     print(
@@ -531,8 +531,7 @@ def _handle_stripe_webhook(
     if selected_account and selected_account != account_name:
         print(
             f"Stripe Account {account_name}: "
-            f"Metadata account mismatch. "
-            f"Received {selected_account}"
+            f"Metadata account mismatch. Received {selected_account}"
         )
         return HttpResponse(status=400)
 
@@ -556,42 +555,53 @@ def _handle_stripe_webhook(
                 id=order_id
             )
 
-            if order.is_paid:
+            already_paid = order.is_paid
+
+            if not already_paid:
+                order.is_paid = True
+                order.stripe_session_id = session_id
+                order.save(
+                    update_fields=[
+                        "is_paid",
+                        "stripe_session_id",
+                    ]
+                )
+
                 print(
                     f"Stripe Account {account_name}: "
-                    f"Order {order.order_number} "
-                    "was already marked as paid"
+                    f"Order {order.order_number} marked as paid"
                 )
-                return HttpResponse(status=200)
 
-            order.is_paid = True
-            order.stripe_session_id = session_id
-            order.save(
-                update_fields=[
-                    "is_paid",
-                    "stripe_session_id",
-                ]
-            )
+            else:
+                print(
+                    f"Stripe Account {account_name}: "
+                    f"Order {order.order_number} was already marked as paid"
+                )
 
-        print(
-            f"Stripe Account {account_name}: "
-            f"Order {order.order_number} marked as paid"
-        )
-
+        # Send or retry the confirmation email.
         try:
             send_order_confirmation_email(order, session)
 
+            recipient_email = (
+                session["customer_email"]
+                if "customer_email" in session
+                else order.email
+            )
+
             print(
                 f"Stripe Account {account_name}: "
-                f"Confirmation email sent to {order.email}"
+                f"Confirmation email sent to {recipient_email}"
             )
 
         except Exception as email_error:
+            import traceback
+
             print(
                 f"Stripe Account {account_name}: "
                 "Email sending failed:",
-                str(email_error),
+                repr(email_error),
             )
+            traceback.print_exc()
 
     except Order.DoesNotExist:
         print(
@@ -601,11 +611,15 @@ def _handle_stripe_webhook(
         return HttpResponse(status=200)
 
     except Exception as error:
+        import traceback
+
         print(
             f"Stripe Account {account_name}: "
             "Order processing error:",
-            str(error),
+            repr(error),
         )
+        traceback.print_exc()
+
         return HttpResponse(status=500)
 
     return HttpResponse(status=200)
