@@ -670,7 +670,7 @@ def stripe_checkout_a(request, order_id):
         request=request,
         order_id=order_id,
         secret_key=settings.STRIPE_SECRET_KEY_LIVE,
-        account_name='A',
+        account_name='LIVE',
     )
 
 
@@ -679,7 +679,7 @@ def stripe_checkout_b(request, order_id):
         request=request,
         order_id=order_id,
         secret_key=settings.STRIPE_SECRET_KEY_TEST,
-        account_name='B',
+        account_name='TEST',
     )
     
 
