@@ -669,7 +669,7 @@ def stripe_checkout_a(request, order_id):
     return _create_stripe_checkout(
         request=request,
         order_id=order_id,
-        secret_key=settings.STRIPE_SECRET_KEY_A,
+        secret_key=settings.STRIPE_SECRET_KEY_LIVE,
         account_name='A',
     )
 
@@ -678,7 +678,7 @@ def stripe_checkout_b(request, order_id):
     return _create_stripe_checkout(
         request=request,
         order_id=order_id,
-        secret_key=settings.STRIPE_SECRET_KEY_B,
+        secret_key=settings.STRIPE_SECRET_KEY_TEST,
         account_name='B',
     )
     
