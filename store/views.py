@@ -501,7 +501,7 @@ def _handle_stripe_webhook(
 
     session_id = session["id"]
     payment_status = session["payment_status"]
-    metadata = session["metadata"] or {}
+    metadata = dict(session["metadata"] or {})
 
     order_id = metadata.get("order_id")
     selected_account = metadata.get("stripe_account")
